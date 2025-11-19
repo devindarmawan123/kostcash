@@ -16,7 +16,6 @@ import dynamic from "next/dynamic";
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-// dynamic import untuk client-side only
 const jsPDF = dynamic(() => import("jspdf"), { ssr: false });
 const html2canvas = dynamic(() => import("html2canvas"), { ssr: false });
 
@@ -27,13 +26,11 @@ export default function Summary() {
   const [chartsReady, setChartsReady] = useState(false);
   const ringkasanRef = useRef(null);
 
-  // Simpan hidden charts di localStorage
   useEffect(() => {
     const saved = localStorage.getItem("hiddenCharts");
     if (saved) setHiddenCharts(JSON.parse(saved));
   }, []);
 
-  // Tunggu chart render
   useEffect(() => {
     const timer = setTimeout(() => setChartsReady(true), 1200); // 1.2 detik setelah mount
     return () => clearTimeout(timer);
@@ -57,7 +54,6 @@ export default function Summary() {
     setIsExporting(true);
 
     try {
-      // Tunggu chart benar-benar render
       await new Promise((res) => setTimeout(res, 1200));
 
       const canvas = await html2canvas.default(ringkasanRef.current, {
@@ -80,7 +76,6 @@ export default function Summary() {
     setIsExporting(false);
   };
 
-  // Prepare data per bulan
   const monthlyCharts = {};
   expenses.forEach((exp) => {
     const date = new Date(exp.tanggal);
@@ -93,7 +88,6 @@ export default function Summary() {
     monthlyCharts[monthKey][dayKey] += total;
   });
 
-  // Prepare data per tahun
   const yearlyCharts = {};
   expenses.forEach((exp) => {
     const date = new Date(exp.tanggal);
@@ -106,7 +100,6 @@ export default function Summary() {
     yearlyCharts[year][month] += total;
   });
 
-  // Prepare data per kategori
   const categoryTotals = {};
   expenses.forEach((exp) => {
     const total = exp.items.reduce((acc, item) => acc + (parseFloat(item) || 0), 0);
@@ -137,7 +130,6 @@ export default function Summary() {
         </button> */}
       </div>
 
-      {/* Per Bulan */}
       <h2 className="text-2xl font-bold mt-6 mb-3">Pengeluaran Per Bulan (Bar per Hari)</h2>
       {Object.entries(monthlyCharts).map(([monthKey, days]) =>
         hiddenCharts[monthKey] ? null : (
@@ -169,7 +161,6 @@ export default function Summary() {
         )
       )}
 
-      {/* Per Tahun */}
       <h2 className="text-2xl font-bold mt-6 mb-3">Pengeluaran Per Tahun (Bar per Bulan)</h2>
       {Object.entries(yearlyCharts).map(([year, months]) =>
         hiddenCharts[`tahun-${year}`] ? null : (
@@ -201,7 +192,6 @@ export default function Summary() {
         )
       )}
 
-      {/* Per Kategori */}
       <h2 className="text-2xl font-bold mt-6 mb-3">Pengeluaran per Kategori</h2>
       <div className="bg-white p-4 rounded-xl shadow mb-6" style={{ height: chartHeight + 50 }}>
         <Pie

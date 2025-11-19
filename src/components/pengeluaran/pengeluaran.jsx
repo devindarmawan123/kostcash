@@ -1,11 +1,10 @@
-// src/components/pengeluaran/ExpenseInput.jsx
 "use client";
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useExpense } from "@/components/pengeluaran/ExpensesContext";
 import { useCategory } from "@/components/category/index";
-import CategoryManager from "@/components/category/CategoryManager";
+import CategoryManager from "@/components/category/categoryManager";
 
 export default function ExpenseInput() {
   const {
@@ -27,7 +26,6 @@ export default function ExpenseInput() {
     <div className="py-6 px-5 bg-gray-200 flex flex-col rounded mx-[15px]">
       <h2 className="text-2xl font-bold mb-4">Tambah Pengeluaran Baru</h2>
 
-      {/* Tanggal */}
       <div className="flex flex-col gap-2 mb-3">
         <label>Tanggal</label>
         <input
@@ -38,7 +36,6 @@ export default function ExpenseInput() {
         />
       </div>
 
-      {/* Kategori */}
       <div className="flex flex-col gap-2 mb-3">
         <label>Kategori</label>
         <div className="flex gap-2">
@@ -55,7 +52,6 @@ export default function ExpenseInput() {
         {openCategoryManager && <CategoryManager onClose={() => setOpenCategoryManager(false)} />}
       </div>
 
-      {/* Nominal */}
       <div className="flex flex-col gap-2 mb-3">
         <label>Nominal</label>
         {newExpense.items.map((item, i) => (
@@ -84,7 +80,6 @@ export default function ExpenseInput() {
         </div>
       </div>
 
-      {/* Riwayat */}
       <h2 className="text-2xl font-bold mt-6 mb-2">Riwayat Pengeluaran</h2>
       {expenses.length === 0 && <p className="text-gray-500">Belum ada pengeluaran.</p>}
       {expenses.slice(-10).reverse().map(exp => (

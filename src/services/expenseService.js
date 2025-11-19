@@ -1,7 +1,3 @@
-// src/services/expenseService.js
-
-// src/services/expenseService.js
-
 import { db, auth } from "@/components/firebase/index";
 import {
   collection,

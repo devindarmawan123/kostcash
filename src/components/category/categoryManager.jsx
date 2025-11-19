@@ -23,7 +23,6 @@ export default function CategoryManager({ onClose }) {
 
   return (
     <div className="mt-4 p-4 bg-blue-50 border rounded-xl w-full flex flex-col gap-4">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Kelola Kategori</h2>
         <button onClick={onClose}>
@@ -31,7 +30,6 @@ export default function CategoryManager({ onClose }) {
         </button>
       </div>
 
-      {/* Input Tambah Kategori */}
       <div className="flex gap-2">
         <input
           type="text"
@@ -48,7 +46,6 @@ export default function CategoryManager({ onClose }) {
           <Plus /> Tambah
         </button>
       </div>
-      {/* List Kategori */}
       <div className="flex flex-col gap-2">
         {categories.map((cat) => (
           <div

@@ -22,7 +22,7 @@ export const listenCategories = (uid, callback) => {
   const q = query(collection(db, "users", uid, "categories"));
   return onSnapshot(q, (snap) => {
     const list = snap.docs.map(doc => ({
-      id: doc.id,   // <- pakai doc.id Firestore
+      id: doc.id,  
       ...doc.data()
     }));
     callback(list);

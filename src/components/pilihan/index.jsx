@@ -5,7 +5,7 @@ import ExpenseInput from "@/components/pengeluaran/pengeluaran";
 import CategorySummary from "@/components/summary/categorySummary";
 
 const Pilihan = () => {
-  const [page, setPage] = useState("input"); // default: input
+  const [page, setPage] = useState("input"); 
 
   return (
     <div className="flex flex-col gap-4">
@@ -24,8 +24,7 @@ const Pilihan = () => {
           RINGKASAN
         </button>
       </div>
-
-      {/* Tampilan berdasarkan pilihan */}
+      
       {page === "input" && <ExpenseInput />}
       {page === "summary" && <CategorySummary />}
     </div>

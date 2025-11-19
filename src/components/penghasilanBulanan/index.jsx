@@ -10,21 +10,18 @@ export default function PenghasilanBulanan() {
   const [penghasilanBulanan, setPenghasilanBulanan] = useState(null);
   const [totalPengeluaran, setTotalPengeluaran] = useState(0);
 
-  // Load penghasilan dari storage saat komponen mount
   useEffect(() => {
     loadIncome().then(value => {
       if (value !== null && value !== undefined) setPenghasilanBulanan(value);
     });
   }, []);
 
-  // Hitung total pengeluaran bulan terbaru
   useEffect(() => {
     if (!expenses || expenses.length === 0) {
       setTotalPengeluaran(0);
       return;
     }
 
-    // Ambil tanggal terbaru dari semua pengeluaran
     const latestExpenseDate = expenses
       .map(exp => new Date(exp.tanggal))
       .sort((a, b) => b - a)[0];
@@ -37,13 +34,11 @@ export default function PenghasilanBulanan() {
     const latestMonth = latestExpenseDate.getMonth();
     const latestYear = latestExpenseDate.getFullYear();
 
-    // Filter pengeluaran yang ada di bulan terbaru
     const latestMonthExpenses = expenses.filter(exp => {
       const d = new Date(exp.tanggal);
       return d.getFullYear() === latestYear && d.getMonth() === latestMonth;
     });
 
-    // Hitung total nominal bulan terbaru
     const total = latestMonthExpenses.reduce(
       (acc, e) => acc + e.items.reduce((a, b) => a + b, 0),
       0
@@ -52,14 +47,12 @@ export default function PenghasilanBulanan() {
     setTotalPengeluaran(total);
   }, [expenses]);
 
-  // Update penghasilan
   const updateIncome = val => {
     const num = val === "" ? null : parseFloat(val);
     setPenghasilanBulanan(num);
     saveIncome(num);
   };
 
-  // Buat alert
   let alert = null;
   if (penghasilanBulanan && penghasilanBulanan > 0) {
     const isWarning = totalPengeluaran > penghasilanBulanan;
