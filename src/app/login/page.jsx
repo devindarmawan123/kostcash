@@ -2,9 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auth } from "@/components/firebase";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { 
+  signInWithEmailAndPassword, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult 
+} from "firebase/auth";
 import useAuthListener from "@/components/navbar/Login/useAuthListener";
 
 const Page = () => {
@@ -12,7 +18,9 @@ const Page = () => {
   const { user } = useAuthListener();
 
   // Kalau sudah login → lempar ke home
-  if (user) router.push("/");
+  useEffect(() => {
+    if (user) router.push("/home");
+  }, [user]);
 
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
@@ -29,11 +37,33 @@ const Page = () => {
     setLoading(false);
   };
 
+  // Tangkap hasil redirect (untuk mobile)
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          router.push("/home");
+        }
+      })
+      .catch((err) => {
+        console.error("Redirect login error:", err);
+      });
+  }, []);
+
   const loginGoogle = async () => {
     setLoading(true);
+    const provider = new GoogleAuthProvider();
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     try {
-      await signInWithPopup(auth,new GoogleAuthProvider());
-      router.push("/home");
+      if (isMobile) {
+        // Mobile pakai redirect
+        await signInWithRedirect(auth, provider);
+      } else {
+        // Desktop pakai popup
+        await signInWithPopup(auth, provider);
+        router.push("/home");
+      }
     } catch (err) {
       alert(err.message);
     }
@@ -59,7 +89,7 @@ const Page = () => {
         </div>
 
         <button onClick={loginEmail} className="hover:bg-color-secondary hover:text-white transition-all p-2 rounded px-4 py-2 bg-gray-300 font-semibold">
-          Login
+          {loading ? "Loading..." : "Login"}
         </button>
         <p className="text-gray-400 text-center">--- or you can ----</p>
         <button onClick={loginGoogle} className="hover:bg-color-secondary hover:text-white transition-all p-2 rounded px-4 py-2 bg-gray-300 font-semibold">
