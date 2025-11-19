@@ -4,7 +4,10 @@
   import { ExpenseProvider } from "@/components/pengeluaran/ExpensesContext"
   import { CategoryProvider } from "@/components/category/index"
 
-  const poppins = Poppins({ subsets: ['latin'] })
+  const poppins = Poppins({ 
+  subsets: ['latin'], 
+  weight: '600' 
+})
 
   export const metadata = {
     title: "KostCash",
