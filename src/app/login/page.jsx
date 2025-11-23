@@ -7,9 +7,9 @@ import { auth } from "@/components/firebase";
 import { 
   signInWithEmailAndPassword, 
   GoogleAuthProvider, 
-  signInWithPopup, 
-  signInWithRedirect, 
-  getRedirectResult 
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
 } from "firebase/auth";
 import useAuthListener from "@/components/navbar/Login/useAuthListener";
 
@@ -19,13 +19,14 @@ const Page = () => {
 
   // Kalau sudah login → lempar ke home
   useEffect(() => {
-    if (user) router.push("/");
+    if (user) router.replace("/");
   }, [user]);
 
   const [email,setEmail] = useState("");
   const [password,setPassword] = useState("");
   const [loading,setLoading] = useState(false);
 
+  // EMAIL PASSWORD LOGIN
   const loginEmail = async () => {
     setLoading(true);
     try {
@@ -37,7 +38,7 @@ const Page = () => {
     setLoading(false);
   };
 
-  // Tangkap hasil redirect (untuk mobile)
+  // HANDLE RESULT DARI REDIRECT (fallback)
   useEffect(() => {
     getRedirectResult(auth)
       .then((result) => {
@@ -50,24 +51,23 @@ const Page = () => {
       });
   }, []);
 
+  // GOOGLE LOGIN HYBRID
   const loginGoogle = async () => {
-    setLoading(true);
     const provider = new GoogleAuthProvider();
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    provider.setCustomParameters({ prompt: "select_account" });
 
     try {
-      if (isMobile) {
-        // Mobile pakai redirect
+      // Coba popup dulu
+      await signInWithPopup(auth, provider);
+      router.push("/");
+    } catch (err) {
+      // Kalau popup keblokir → fallback ke redirect
+      if (err.code === "auth/popup-blocked") {
         await signInWithRedirect(auth, provider);
       } else {
-        // Desktop pakai popup
-        await signInWithPopup(auth, provider);
-        router.push("/");
+        alert(err.message);
       }
-    } catch (err) {
-      alert(err.message);
     }
-    setLoading(false);
   };
 
   return (
@@ -84,16 +84,19 @@ const Page = () => {
         />
 
         <div className="flex justify-between text-sm">
-          {/* <Link href="/login/forgotpassword" className="text-blue-500 hover:underline">Lupa password</Link> */}
-          <Link href="/login/register" className="text-blue-500 hover:underline">Register</Link>
+          <Link href="/login/register" className="text-blue-500 hover:underline">
+            Register
+          </Link>
         </div>
 
         <button onClick={loginEmail} className="hover:bg-color-secondary hover:text-white transition-all p-2 rounded px-4 py-2 bg-gray-300 font-semibold">
           {loading ? "Loading..." : "Login"}
         </button>
+
         <p className="text-gray-400 text-center">--- or you can ----</p>
+
         <button onClick={loginGoogle} className="hover:bg-color-secondary hover:text-white transition-all p-2 rounded px-4 py-2 bg-gray-300 font-semibold">
-          {loading ? "Loading..." : "Continue with Google"}
+          Continue with Google
         </button>
       </div>
     </div>
