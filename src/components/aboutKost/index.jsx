@@ -1,6 +1,6 @@
 const AboutKost = () => {
     return (
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-2xl py-8 px-12 mt-10 mx-[12px] text-white">
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl shadow-2xl py-8 px-12 mt-10 mx-[12px] text-white animate-fadeSlide">
           <div className="flex items-center gap-4 mb-3">
             {/* Logo */}
             <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 shadow-lg">

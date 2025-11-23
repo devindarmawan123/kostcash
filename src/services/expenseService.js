@@ -15,8 +15,12 @@ export const addExpenseToDB = async (data) => {
   if (!user) return null;
 
   const userRef = collection(db, "users", user.uid, "expenses");
-  
-  const docRef = await addDoc(userRef, data); 
+
+  const docRef = await addDoc(userRef, {
+    ...data,
+    createdAt: Date.now(), 
+  });
+
   return docRef.id;
 };
 
@@ -24,13 +28,20 @@ export const listenExpenses = (userId, callback) => {
   if (!userId) return () => {};
 
   const userRef = collection(db, "users", userId, "expenses");
-  const q = query(userRef); 
+
+  const q = query(userRef, orderBy("createdAt", "desc"));
 
   return onSnapshot(q, (snapshot) => {
-    const list = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(), 
-    }));
+    const list = snapshot.docs.map((doc) => {
+      const data = doc.data();
+
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt ?? 0, 
+      };
+    });
+
     callback(list);
   });
 };
@@ -43,12 +54,18 @@ export const deleteExpenseFromDB = async (id) => {
   await deleteDoc(ref);
 };
 
+
 export const addCategoryToDB = async (name) => {
   const user = auth.currentUser;
   if (!user) return null;
 
   const userRef = collection(db, "users", user.uid, "categories");
-  const docRef = await addDoc(userRef, { name, createdAt: new Date() });
+
+  const docRef = await addDoc(userRef, {
+    name,
+    createdAt: Date.now(),
+  });
+
   return { id: docRef.id, name };
 };
 

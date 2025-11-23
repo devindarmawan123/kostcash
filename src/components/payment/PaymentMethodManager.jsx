@@ -2,25 +2,23 @@
 
 import { useState } from "react";
 import { X, Edit, Trash2, CheckCircle, Plus } from "lucide-react";
-import { useCategory } from "./index";
+import { useMethod } from "@/components/payment/PaymentMethodContext";
 
-export default function CategoryManager({ onClose }) {
-  const { categories, addCategory, deleteCategory, updateCategory } = useCategory();
-  const [newCat, setNewCat] = useState("");
+export default function MethodManager({ onClose }) {
+  const { method, addMethod, deleteMethod, updateMethod } = useMethod();
+  const [newMet, setNewMet] = useState("");
   const [editMode, setEditMode] = useState(null);
   const [editName, setEditName] = useState("");
 
   const handleAdd = async () => {
-    const trimmed = newCat.trim();
-    if (!trimmed) return;
-    await addCategory(trimmed);
-    setNewCat("");
+    if (!newMet.trim()) return;
+    await addMethod(newMet);
+    setNewMet("");
   };
 
   const handleUpdate = async (id) => {
-    const trimmed = editName.trim();
-    if (!trimmed) return;
-    await updateCategory(id, { name: trimmed });
+    if (!editName.trim()) return;
+    await updateMethod(id, { name: editName });
     setEditMode(null);
     setEditName("");
   };
@@ -28,7 +26,7 @@ export default function CategoryManager({ onClose }) {
   return (
     <div className="mt-4 p-4 bg-blue-50 border rounded-xl w-full flex flex-col gap-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Kelola Kategori</h2>
+        <h2 className="text-2xl font-bold">Kelola Metode Pembayaran</h2>
         <button onClick={onClose}>
           <X className="w-6 h-6" />
         </button>
@@ -37,10 +35,10 @@ export default function CategoryManager({ onClose }) {
       <div className="flex flex-col sm:flex-row gap-2">
         <input
           type="text"
-          placeholder="Kategori baru…"
+          placeholder="Metode baru…"
           className="flex-1 border rounded-lg p-2"
-          value={newCat}
-          onChange={(e) => setNewCat(e.target.value)}
+          value={newMet}
+          onChange={(e) => setNewMet(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
         />
         <button
@@ -52,13 +50,16 @@ export default function CategoryManager({ onClose }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        {categories.length === 0 && (
-          <p className="text-gray-500 text-sm">Belum ada kategori.</p>
+        {method.length === 0 && (
+          <p className="text-gray-500 text-sm">Belum ada metode pembayaran.</p>
         )}
 
-        {categories.map((c) => (
-          <div key={c.id} className="flex items-center justify-between p-2 bg-white rounded-lg border">
-            {editMode === c.id ? (
+        {method.map((m) => (
+          <div
+            key={m.id}
+            className="flex items-center justify-between p-2 bg-white rounded-lg border"
+          >
+            {editMode === m.id ? (
               <input
                 type="text"
                 className="flex-1 border rounded-lg p-1"
@@ -66,21 +67,33 @@ export default function CategoryManager({ onClose }) {
                 onChange={(e) => setEditName(e.target.value)}
               />
             ) : (
-              <span className="text-lg">{c.name}</span>
+              <span className="text-lg">{m.name}</span>
             )}
 
             <div className="flex gap-2">
-              {editMode === c.id ? (
-                <button className="text-green-600" onClick={() => handleUpdate(c.id)}>
+              {editMode === m.id ? (
+                <button
+                  className="text-green-600"
+                  onClick={() => handleUpdate(m.id)}
+                >
                   <CheckCircle className="w-5 h-5" />
                 </button>
               ) : (
-                <button className="text-yellow-600" onClick={() => { setEditMode(c.id); setEditName(c.name); }}>
+                <button
+                  className="text-yellow-600"
+                  onClick={() => {
+                    setEditMode(m.id);
+                    setEditName(m.name);
+                  }}
+                >
                   <Edit className="w-5 h-5" />
                 </button>
               )}
 
-              <button className="text-red-600" onClick={() => deleteCategory(c.id)}>
+              <button
+                className="text-red-600"
+                onClick={() => deleteMethod(m.id)}
+              >
                 <Trash2 className="w-5 h-5" />
               </button>
             </div>

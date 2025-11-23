@@ -4,7 +4,10 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useExpense } from "@/components/pengeluaran/ExpensesContext";
 import { useCategory } from "@/components/category/index";
+import { useMethod } from "@/components/payment/PaymentMethodContext";
 import CategoryManager from "@/components/category/categoryManager";
+import MethodManager from "@/components/payment/PaymentMethodManager";
+import ExpenseSearch from "@/components/pengeluaran/ExpenseSearch";
 
 export default function ExpenseInput() {
   const {
@@ -16,42 +19,127 @@ export default function ExpenseInput() {
     removeItem,
     addExpense,
     deleteExpense,
-    saving
+    saving,
   } = useExpense();
 
   const { categories } = useCategory();
+  const { method } = useMethod(); // ambil method dari context
+
   const [openCategoryManager, setOpenCategoryManager] = useState(false);
+  const [openMethodManager, setOpenMethodManager] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAddExpense = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await addExpense();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const filteredExpenses = (expenses || []).filter((exp) => {
+    const query = (searchQuery || "").toLowerCase();
+    const matchKategori = (exp.kategori || "").toLowerCase().includes(query);
+    const matchTanggal = (exp.tanggal || "").includes(query);
+    const matchNominal =
+      Array.isArray(exp.items) &&
+      exp.items.some((item) => item.toString().includes(query));
+    const matchPayment =
+      (exp.paymentMethod || "").toLowerCase().includes(query);
+
+    return matchKategori || matchTanggal || matchNominal || matchPayment;
+  });
 
   return (
     <div className="py-6 px-5 bg-gray-200 flex flex-col rounded mx-[15px]">
       <h2 className="text-2xl font-bold mb-4">Tambah Pengeluaran Baru</h2>
 
+      {/* Tanggal */}
       <div className="flex flex-col gap-2 mb-3">
         <label>Tanggal</label>
         <input
           type="date"
           value={newExpense.tanggal}
-          onChange={e => setNewExpense({...newExpense, tanggal: e.target.value})}
+          onChange={(e) =>
+            setNewExpense({ ...newExpense, tanggal: e.target.value })
+          }
           className="p-2 rounded"
         />
       </div>
 
+      {/* Kategori */}
       <div className="flex flex-col gap-2 mb-3">
         <label>Kategori</label>
         <div className="flex gap-2">
           <select
             value={newExpense.kategori}
-            onChange={e => setNewExpense({...newExpense, kategori: e.target.value})}
+            onChange={(e) =>
+              setNewExpense({ ...newExpense, kategori: e.target.value })
+            }
             className="flex-grow p-2 rounded"
           >
-            <option value="" disabled>Pilih kategori</option>
-            {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
+            <option value="" disabled>
+              Pilih kategori
+            </option>
+            {(categories || []).map((cat) => (
+              <option key={cat.id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
           </select>
-          <button onClick={() => setOpenCategoryManager(true)} className="p-2 bg-blue-300 rounded text-blue-600"><Plus /></button>
+
+          <button
+            onClick={() => setOpenCategoryManager(true)}
+            className="p-2 bg-blue-300 rounded text-blue-600"
+          >
+            <Plus />
+          </button>
         </div>
-        {openCategoryManager && <CategoryManager onClose={() => setOpenCategoryManager(false)} />}
+
+        {openCategoryManager && (
+          <CategoryManager onClose={() => setOpenCategoryManager(false)} />
+        )}
       </div>
 
+      {/* Metode Pembayaran */}
+      <div className="flex flex-col gap-2 mb-3">
+  <label>Metode Pembayaran</label>
+  <div className="flex gap-2">
+    <select
+      value={newExpense.paymentMethod || ""} // pastikan default value = ""
+      onChange={(e) =>
+        setNewExpense({ ...newExpense, paymentMethod: e.target.value })
+      }
+      className="flex-grow p-2 rounded"
+    >
+      <option value="" disabled>
+        Pilih metode pembayaran
+      </option>
+      {method.map((m) => (
+        <option key={m.id} value={m.name}>
+          {m.name}
+        </option>
+      ))}
+    </select>
+
+    <button
+      onClick={() => setOpenMethodManager(true)}
+      className="p-2 bg-blue-300 rounded text-blue-600"
+    >
+      <Plus />
+    </button>
+  </div>
+
+  {openMethodManager && (
+    <MethodManager onClose={() => setOpenMethodManager(false)} />
+  )}
+</div>
+
+
+      {/* Nominal */}
       <div className="flex flex-col gap-2 mb-3">
         <label>Nominal</label>
         {newExpense.items.map((item, i) => (
@@ -59,49 +147,98 @@ export default function ExpenseInput() {
             <input
               type="number"
               value={item}
-              onChange={e => handleItemChange(i, e.target.value)}
+              onChange={(e) => handleItemChange(i, e.target.value)}
               placeholder="contoh 20000"
               className="flex-grow p-2 rounded"
             />
-            {newExpense.items.length > 1 &&
-              <button onClick={() => removeItem(i)} className="p-1"><Trash2 /></button>
-            }
+            {newExpense.items.length > 1 && (
+              <button onClick={() => removeItem(i)} className="p-1">
+                <Trash2 />
+              </button>
+            )}
           </div>
         ))}
+
         <div className="flex gap-2 mt-2">
-          <button onClick={addItem} className="flex items-center gap-1 p-2 rounded bg-gray-300"><Plus /> Tambah Nominal</button>
           <button
-            onClick={addExpense}
-            disabled={saving || !newExpense.kategori || newExpense.items.every(i => !i || parseInt(i) <= 0)}
-            className={`flex-grow p-2 rounded font-semibold text-white ${saving || !newExpense.kategori || newExpense.items.every(i => !i || parseInt(i) <= 0) ? "bg-blue-300 cursor-not-allowed" : "bg-blue-500"}`}
+            onClick={addItem}
+            className="flex items-center gap-1 p-2 rounded bg-gray-300"
           >
-            Simpan Pengeluaran
+            <Plus /> Tambah Nominal
+          </button>
+
+          <button
+            onClick={handleAddExpense}
+            disabled={
+              saving ||
+              isSubmitting ||
+              !newExpense.kategori ||
+              !newExpense.paymentMethod ||
+              newExpense.items.every((i) => !i || parseInt(i) <= 0)
+            }
+            className={`flex-grow p-2 rounded font-semibold text-white ${
+              saving ||
+              isSubmitting ||
+              !newExpense.kategori ||
+              !newExpense.paymentMethod ||
+              newExpense.items.every((i) => !i || parseInt(i) <= 0)
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-600"
+            }`}
+          >
+            {isSubmitting ? "Menyimpan..." : "Simpan Pengeluaran"}
           </button>
         </div>
       </div>
 
-      <h2 className="text-2xl font-bold mt-6 mb-2">Riwayat Pengeluaran</h2>
-      {expenses.length === 0 && <p className="text-gray-500">Belum ada pengeluaran.</p>}
-      {expenses.slice(-10).reverse().map(exp => (
-        <div key={exp.id} className="flex justify-between items-center p-3 bg-white rounded mb-2">
+      {/* Riwayat Pengeluaran */}
+      <div className="flex md:flex-row flex-col justify-between items-center mb-3 gap-4">
+        <h2 className="md:text-2xl text-xl font-bold">Riwayat Pengeluaran</h2>
+        <ExpenseSearch
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+      </div>
+
+      {filteredExpenses.length === 0 && (
+        <p className="text-gray-500">Belum ada pengeluaran.</p>
+      )}
+
+      {filteredExpenses.slice(0, 10).map((exp) => (
+        <div
+          key={exp.id}
+          className="flex justify-between items-center p-3 bg-white rounded mb-2"
+        >
           <div>
             <div className="flex gap-2">
               <div className="font-semibold">{exp.kategori}</div>
               <div className="text-gray-500">{exp.tanggal}</div>
             </div>
-            <div>
-              {exp.items.map((n,i) => (
+
+            <div className="text-sm text-gray-700">
+              Metode: <b>{exp.paymentMethod}</b>
+            </div>
+            {exp.items.length > 1 && (
+            <div className="text-sm">
+              {exp.items.map((n, i) => (
                 <span key={i}>
                   Rp {parseInt(n).toLocaleString("id-ID")}
-                  {i !== exp.items.length-1 && " + "}
+                  {i !== exp.items.length - 1 && " + "}
                 </span>
               ))}
             </div>
-            <div className="text-blue-700 font-bold mt-1">
-              Rp {exp.items.reduce((a,b) => a+b,0).toLocaleString("id-ID")}
+            )}
+            <div className="text-blue-700 font-bold mt-1 text-xl">
+              Rp {exp.items.reduce((a, b) => a + b, 0).toLocaleString("id-ID")}
             </div>
           </div>
-          <button onClick={() => deleteExpense(exp.id)} className="p-2 bg-red-500 hover:bg-red-600 text-white rounded">Hapus</button>
+
+          <button
+            onClick={() => deleteExpense(exp.id)}
+            className="p-2 bg-red-500 hover:bg-red-600 text-white rounded"
+          >
+            Hapus
+          </button>
         </div>
       ))}
     </div>

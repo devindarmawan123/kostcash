@@ -5,12 +5,20 @@ import "@/app/globals.css"
 import useAuthListener from "@/components/navbar/Login/useAuthListener"
 import { auth } from "@/components/firebase/index"
 import { signOut } from "firebase/auth";
+import { usePathname } from "next/navigation";
 
 const NavigationBar = () => {
   const{ user } = useAuthListener();
+  const pathname = usePathname();
+
   const handleLogout = async() => {
     await signOut(auth);
   }
+
+  const isDashboard = pathname === "/dashboard";
+  const dashboardText = isDashboard ? "Kembali" : "Dashboard Anda";
+  const dashboardHref = isDashboard ? "/" : "/dashboard";
+
   return (
     <nav className="flex flex-row justify-between items-center w-full bg-color-primary text-md py-4 gap-3">
       <Link
@@ -63,9 +71,10 @@ const NavigationBar = () => {
         </div>
       </Link>
       { user ? (
-        <div className="flex right-4 mx-2 text-color-white font-bold">
+        <div className="flex items-center right-4 mx-2 text-color-white font-bold md:gap-6 gap-5 text-sm md:text-md">
+          <Link href={dashboardHref} className="hover:underline">{dashboardText}</Link>
           <button onClick={handleLogout} 
-          className="bg-blue-500 rounded px-6"
+          className="bg-blue-500 text-white px-2 py-2 rounded-md shadow hover:bg-blue-600 transition"
           > Logout
           </button>
         </div>
@@ -73,7 +82,7 @@ const NavigationBar = () => {
     (
 
         <div className="flex right-4 mx-2 text-color-white font-bold">
-        <Link href="/login" className="bg-blue-500 rounded px-7">
+        <Link href="/login" className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 transition">
           Login
         </Link>
       </div>

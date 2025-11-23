@@ -19,7 +19,7 @@ const Page = () => {
 
   // Kalau sudah login → lempar ke home
   useEffect(() => {
-    if (user) router.push("/home");
+    if (user) router.push("/");
   }, [user]);
 
   const [email,setEmail] = useState("");
@@ -30,7 +30,7 @@ const Page = () => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth,email,password);
-      router.push("/home");
+      router.push("/");
     } catch (err) {
       alert(err.message);
     }
@@ -42,7 +42,7 @@ const Page = () => {
     getRedirectResult(auth)
       .then((result) => {
         if (result) {
-          router.push("/home");
+          router.push("/");
         }
       })
       .catch((err) => {
@@ -62,7 +62,7 @@ const Page = () => {
       } else {
         // Desktop pakai popup
         await signInWithPopup(auth, provider);
-        router.push("/home");
+        router.push("/");
       }
     } catch (err) {
       alert(err.message);

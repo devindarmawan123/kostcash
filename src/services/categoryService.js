@@ -1,7 +1,7 @@
 import { db } from "@/components/firebase/index";
-import { collection, doc, setDoc, deleteDoc, updateDoc, onSnapshot, query } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query } from "firebase/firestore";
 
-export const addCategoryToDB = async (uid, name, color) => {
+export const addCategoryToDB = async (uid, name, color = "") => {
   const id = Date.now().toString();
   await setDoc(doc(db, "users", uid, "categories", id), {
     id,
@@ -22,10 +22,9 @@ export const listenCategories = (uid, callback) => {
   const q = query(collection(db, "users", uid, "categories"));
   return onSnapshot(q, (snap) => {
     const list = snap.docs.map(doc => ({
-      id: doc.id,  
+      id: doc.id,
       ...doc.data()
     }));
     callback(list);
   });
 };
-

@@ -3,6 +3,7 @@
   import { Poppins } from 'next/font/google'
   import { ExpenseProvider } from "@/components/pengeluaran/ExpensesContext"
   import { CategoryProvider } from "@/components/category/index"
+  import {MethodContextProvider} from "@/components/payment/PaymentMethodContext";
 
   const poppins = Poppins({ 
   subsets: ['latin'], 
@@ -18,12 +19,14 @@
     return (
       <html lang="en">
         <body className={`${poppins.className}`} >
-        <NavigationBar/>
+        <MethodContextProvider>
         <CategoryProvider>
         <ExpenseProvider>
+        <NavigationBar/>
           {children}
         </ExpenseProvider>
         </CategoryProvider>
+        </MethodContextProvider>
           </body>
       </html>
     );
